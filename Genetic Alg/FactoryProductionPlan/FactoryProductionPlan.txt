@@ -1,0 +1,99 @@
+Целта на оваа вежба е оптимизација на производствен план со користење на Генетски алгоритми.
+
+Фабрика произведува N производи. Секој производ бара време на две машини (A и B), материјал, работни часови и носи профит по единица.
+Доколку производот се произведува (количина > 0), се плаќа фиксен трошок за подесување (setup cost). Фабриката има ограничени
+ресурси неделно: машина A (макс часови), машина B (макс часови), материјали (буџет), складишен простор (единици) и работни часови.
+Доколку количината на еден производ го надмине прагот за попуст (bulk_threshold), профитот по единица за тој производ се зголемува
+за 25%.
+
+Генот претставува количина на производ (0 до 15). Хромозомот има N гени, по еден за секој производ. Ова е прв пат да користите
+целобројно количинско кодирање (integer quantity encoding) наместо селекција или доделување – вредноста на генот директно кажува
+КОЛКУ единици од тој производ да се произведат.
+
+Вкупниот профит се пресметува:
+профит = збир(количина * (profit_per_unit * (1.25 ако количина >= bulk_threshold, инаку 1)) - setup_cost(ако > 0))
+
+Од стандарден влез се чита: N – број на производи; N линии со 6 броја: profit_per_unit, machine_A, machine_B, material,
+setup_cost, labor; 5 линии со ресурсни ограничувања: mA_max, mB_max, materials_max, storage_max, labor_max; еден број – bulk_threshold.
+
+Со користење на Генетски алгоритам имплементиран со библиотеката pygad, определете ги количините на секој производ со цел
+да се максимизира вкупниот профит без да се надминат ресурсните ограничувања. Решенијата кои ги надминуваат ограничувањата
+треба да се казнат.
+
+Испечатете ја максималната вкупна добивка (заокружена на 2 децимали).
+
+Забелешка: За да го добиете најдоброто решение во текот на сите генерации, користете ga.best_solution(ga.last_generation_fitness).
+Возможно е да има неконзистентност на типот (list/numpy низа) на променливата chromosome/solution.
+
+Starter code:
+import pygad
+import random
+random.seed(0)
+
+
+def read_input():
+    N = int(input())
+    products = []
+    for _ in range(N):
+        profit, mA, mB, mat, setup, labor = map(int, input().split())
+        products.append({'profit': profit, 'mA': mA, 'mB': mB, 'mat': mat, 'setup': setup, 'labor': labor})
+    mA_max, mB_max, materials_max, storage_max, labor_max = map(int, input().split())
+    bulk_threshold = int(input())
+    return N, products, mA_max, mB_max, materials_max, storage_max, labor_max, bulk_threshold
+
+
+def fitness_func(ga, solution, idx):
+    ...  # TODO: implement fitness function
+
+
+if __name__ == "__main__":
+    N, products, mA_max, mB_max, materials_max, storage_max, labor_max, bulk_threshold = read_input()
+
+    params = {
+        'num_generations': 300,
+        'sol_per_pop': 50,
+        'num_parents_mating': 20,
+        'num_genes': ...,  # TODO: fill empty params
+        'gene_space': ...,
+        'fitness_func': fitness_func,
+        'mutation_num_genes': 1,
+    }
+
+    ga = pygad.GA(**params)
+    ga.run()
+
+    best_solution, _, _ = ga.best_solution(ga.last_generation_fitness)
+    best_fitness = fitness_func(ga, best_solution, 0)
+
+    print(f'{best_fitness:.2f}')
+
+Cases:
+Test	Input	Result
+"""Product 0 (qty=3, profit=30, no bulk)
+Product 1 (qty=4, bulk, profit=25/unit)"""
+2
+10 2 1 3 4 2
+20 3 2 5 7 3
+30 20 50 15 18
+4
+119.00
+"""Product 0 (qty=8, bulk, profit=15/unit)
+Product 1 (qty=7, no bulk, profit=18/unit)
+Product 2 (qty=3, no bulk, profit=10/unit)"""
+4
+12 2 1 3 5 2
+18 1 3 5 8 3
+10 3 2 2 4 1
+25 4 2 7 10 4
+45 35 120 25 40
+8
+259.00
+"""Product 1 (qty=8, bulk, profit=18.75/unit)
+Product 2 (qty=6, bulk, profit=15.00/unit)"""
+3
+8 1 1 2 3 1
+15 2 2 4 6 2
+12 3 1 3 5 2
+35 25 80 20 28
+6
+229.00

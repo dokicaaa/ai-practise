@@ -1,9 +1,7 @@
 import os
-
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 import numpy as np
 from sklearn.metrics import accuracy_score, recall_score
-
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -101,7 +99,6 @@ if __name__ == '__main__':
 
     vote_predictions = []
 
-    # SVATI UBAVO
     for i in range(len(Y_test)):
         votes = {0: 0, 1: 0}
 

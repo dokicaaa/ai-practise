@@ -1,11 +1,11 @@
 import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeClassifier
 
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from dataset_script import dataset
 
@@ -27,6 +27,7 @@ if __name__ == '__main__':
 
     dt = DecisionTreeClassifier(criterion=C, max_leaf_nodes=L, random_state=0)
     dt.fit(X_train, Y_train)
+
     predOrg = dt.predict(X_test)
     accOrg = accuracy_score(Y_test, predOrg)
 

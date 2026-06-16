@@ -1,9 +1,10 @@
 import os
 
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['OMP_NUM_THREADS'] = '1'
+
 import numpy as np
 from sklearn.metrics import accuracy_score
-
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import warnings
 from sklearn.neural_network import MLPClassifier
@@ -200,3 +201,4 @@ if __name__ == '__main__':
 
     print(f"Tocnost so StandardScaler: {acc_std}")
     print(f"Tocnost so MinMaxScaler: {acc_mm}")
+

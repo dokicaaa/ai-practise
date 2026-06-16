@@ -1386,7 +1386,7 @@ dataset = [['C', 'S', 'O', '1', '2', '1', '1', '2', '1', '2', '0'],
 
 if __name__ == '__main__':
   split_X = int(input())
-  criterion = input().strip
+  criterion = input().strip()
 
   X = [row[:-1] for row in dataset]
   Y = [row[-1] for row in dataset]

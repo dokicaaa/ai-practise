@@ -23,8 +23,6 @@ def fitness_func(ga_instance, solution, solution_idx):
     makespan =
     return -makespan
 
-
-
 if __name__ == "__main__":
     N, K, times, speeds = read_input()
 

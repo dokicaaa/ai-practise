@@ -30,6 +30,7 @@ if __name__ == '__main__':
     # 3.No repeating in one block
     for block_row in range(3):
         for block_column in range(3):
+            
             block_cells = []
             for r in range(3):
                 for c in range(3):

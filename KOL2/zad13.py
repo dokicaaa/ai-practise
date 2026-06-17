@@ -154,3 +154,4 @@ if __name__ == '__main__':
 
     accuracy = correct_predictions / float(len(Y_test))
     print(f"Tochnost: {accuracy}")
+

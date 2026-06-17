@@ -3,16 +3,21 @@ from constraint import *
 if __name__ == '__main__':
     n = int(input())
 
+    # ── All possible cell positions on the board ──────────────────────
     all_cells = [(r, c) for r in range(n) for c in range(n)]
 
     if n <= 6:
+        # ── Return COUNT of all unique solutions ──────────────────────
         problem = Problem(BacktrackingSolver())
 
+        # Each queen gets a variable (1..n), domain = all board cells
         for queen in range(1, n + 1):
             problem.addVariable(queen, all_cells)
 
+        # No two queens on the same cell
         problem.addConstraint(AllDifferentConstraint(), list(range(1, n + 1)))
 
+        # For every PAIR of queens, check no shared row, col, or diagonal
         for q1 in range(1, n + 1):
             for q2 in range(q1 + 1, n + 1):
                 problem.addConstraint(

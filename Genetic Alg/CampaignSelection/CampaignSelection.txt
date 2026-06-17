@@ -1,0 +1,78 @@
+Целта на оваа вежба е оптимизација на селекција на маркетиншки кампањи со користење на Генетски алгоритми.
+
+Дадени се N кампањи. Секоја кампања има трошок, профит и медиум преку кој се споделува.
+Потребно е со генетски алгоритам да се изберат кампањи кои вкупно ќе дадат најголем вкупен профит,
+притоа не надминувајќи го буџетот B (не смее избраните кампањи да го надминат буџетот B со нивниот трошок).
+Исто така, доколку од некој медиум има >= 3 кампањи, поради добра соработка, вкупниот профит
+се зголемува за 15 % за тие кампањи од тој медиум.
+
+Генот претставува дали кампањата е избрана (1) или не (0). Хромозомот има N гени, по еден за секоја кампања.
+
+На влез, прво се читаат N и B. Потоа, за секоја од N-те кампањи се читаат податоците:
+трошок, профит и медиум (стринг).
+
+На излез се печати вкупен профит од избраните кампањи, вкупен трошок, и кои се тие кампањи
+(со нивниот трошок, профит и медиум).
+
+Starter code:
+
+import pygad
+import random
+random.seed(0)
+
+
+def read_input():
+    N = int(input())
+    B = int(input())
+    campaigns = []
+    for i in range(N):
+        cost, profit, channel = input().split()
+        campaigns.append({'cost': int(cost), 'profit': int(profit), 'channel': channel})
+    return N, B, campaigns
+
+
+def total_profit(solution):
+    ...  # TODO: implement total_profit
+
+
+def fitness_func(ga, solution, solution_idx):
+    total = ...  # TODO: check budget, call total_profit
+    return total
+
+
+if __name__ == "__main__":
+    N, B, campaigns = read_input()
+
+    params = {
+        'num_generations': 500,
+        'sol_per_pop': 100,
+        'num_parents_mating': 40,
+        'num_genes': ...,  # TODO
+        'gene_space': ...,  # TODO
+        'fitness_func': fitness_func,
+        'mutation_num_genes': 1,
+    }
+
+    ga = pygad.GA(**params)
+    ga.run()
+
+    best_solution, _, _ = ga.best_solution(ga.last_generation_fitness)
+
+    ...  # TODO: print total cost, total profit, selected campaigns
+
+Cases:
+Test 1:
+Input:
+4
+100
+40 50 TV
+20 30 RADIO
+60 30 RADIO
+70 100 TV
+
+Expected output:
+Total cost: 90
+Total profit: 130
+Izbrani kampanji:
+Kampanja 2: cost=20, profit=30, channel=RADIO
+Kampanja 4: cost=70, profit=100, channel=TV

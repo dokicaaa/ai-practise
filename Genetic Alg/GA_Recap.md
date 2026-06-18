@@ -16,6 +16,7 @@
 | SmartHomeScheduler | Temporal | start hour (0..23) | `range(24)` | `list of dicts` | −min | `-9999999` | `f'{-v:.2f}'` |
 | EVChargingSchedule | Temporal | start hour (0..23) | `range(24)` | flat `list[]` | −min | `-100000` | `f'{-v:.2f}'` |
 | CookingSchedule | Temporal | start hour (0..23) | `range(24)` | flat `list[]` | +max | `-999999` | `f'{v:.2f}'` |
+| CampaignSelection | Binary | 0 or 1 | `[0, 1]` | `list of dicts` | +max | `-99999` | custom multi-line |
 
 ---
 
@@ -294,7 +295,80 @@ return total_quality
 
 ---
 
-## 6. Data Access: dict vs list
+## 6. Binary Selection / Grid Encoding
+
+**Gene = 0 (skip) or 1 (select).** Two variants:
+
+### 6A. Knapsack-style (CampaignSelection)
+
+`num_genes = N` (one per item), `gene_space = [0, 1]`.
+
+```python
+# CampaignSelection — select N campaigns within budget B
+def fitness_func(ga, solution, idx):
+    total_cost = 0
+    for i, selected in enumerate(solution):
+        if selected == 1:
+            total_cost += campaigns[i]['cost']
+
+    if total_cost > B:
+        return -99999
+
+    # Channel multiplier: ≥3 campaigns on same channel → 1.15× profit
+    channels_counts = {}
+    channels_profits = {}
+    for i, selected in enumerate(solution):
+        if selected == 1:
+            ch = campaigns[i]['channel']
+            channels_counts[ch] = channels_counts.get(ch, 0) + 1
+            channels_profits[ch] = channels_profits.get(ch, 0) + campaigns[i]['profit']
+
+    total = 0.0
+    for ch, count in channels_counts.items():
+        total += channels_profits[ch] * (1.15 if count >= 3 else 1.0)
+    return total
+```
+
+### 6B. Binary Grid (MaxCrops resolved variant)
+
+`num_genes = M * N` (one per cell), `gene_space = [0, 1]`. Each gene tells whether a sprinkler is placed at that cell.
+
+```python
+def fitness_func(ga_instance, solution, solution_idx):
+    watered = set()
+    destroyed = set()
+    num_sprinklers = 0
+
+    offsets = [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1),
+               (1,-1), (1,0), (1,1), (-2,0), (2,0), (0,-2), (0,2)]
+
+    for idx, val in enumerate(solution):
+        if val == 1:
+            num_sprinklers += 1
+            row = idx // N
+            col = idx % N
+            if (row, col) not in unusable:
+                destroyed.add((row, col))
+
+            for dr, dc in offsets:
+                nr, nc = row + dr, col + dc
+                if 0 <= nr < M and 0 <= nc < N:
+                    watered.add((nr, nc))
+
+    valid_watered = watered - unusable - destroyed
+    return len(valid_watered) * 1000 - num_sprinklers   # tie-breaker
+```
+
+### Key points
+- `gene_space = [0, 1]` for binary selection  
+- `num_genes = N` (one per item) or `M * N` (one per grid cell)  
+- Death penalty for budget/resource limits  
+- Channel/category grouping for bonus multipliers  
+- Grid variant: `idx // N, idx % N` to decode 1D → 2D  
+
+---
+
+## 7. Data Access: dict vs list
 
 ### When to use dict
 ```python
@@ -340,7 +414,7 @@ kwh[i]
 
 ---
 
-## 7. Sign Convention
+## 8. Sign Convention
 
 | Sign | Meaning | Problems | Output |
 |------|---------|----------|--------|
@@ -358,7 +432,7 @@ print(int(-best_solution_fitness))
 
 ---
 
-## 8. Extraction Methods
+## 9. Extraction Methods
 
 ```python
 # RECOMMENDED — find best across ALL generations
@@ -373,7 +447,7 @@ best_fitness = fitness_func(ga, best_solution, 0)
 
 ---
 
-## 9. Building Custom Print Output
+## 10. Building Custom Print Output
 
 ```python
 # Per-item assignment (ConstructSites)
@@ -404,7 +478,7 @@ int(-best_solution_fitness)  # cast to integer
 
 ---
 
-## 10. Common Pitfalls
+## 11. Common Pitfalls
 
 ```python
 # 1. numpy → int conversion (pygad passes numpy arrays)
@@ -442,7 +516,7 @@ team_indices = np.where(best_solution == team_id)[0]
 
 ---
 
-## 11. Parameter Template
+## 12. Parameter Template
 
 ```python
 params = {
